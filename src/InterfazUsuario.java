@@ -7,7 +7,7 @@
  * @version 1.0 May 2022
  * @since Modeling and Programming 2022-2
  */
-public interface InterfazUsuario {
+public interface  InterfazUsuario {
     
     /**
      * Agrega la respuesta dada por el usuario.
@@ -21,4 +21,12 @@ public interface InterfazUsuario {
      * @return true si se borraron las respuestas del usuario, false en otro caso.
      */
     public boolean limpiarRespuestas();
+
+    /**
+     * Se establecen los problemas del usuario
+     * @return boolean si se establecieron correctamente los problemas.
+     * En caso de ser no la encuesta no ha sido terminada o no se tienen
+     * suficientes datos del usuario.
+     */
+    public boolean establecerProblemas();
 }

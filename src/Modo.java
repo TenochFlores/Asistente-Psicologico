@@ -12,12 +12,28 @@ public abstract class Modo {
     /**
      * Usuario al que hace referencia
      */
-    protected UsuarioProxy usuiario;
+    protected UsuarioProxy usuario;
 
     /**
-     * Encuesta actual del modo
+     * Controlador para las encuestas
      */
-    protected Encuesta encuesta;
+    protected ControladorEncuesta controlador;
+
+    /**
+     * Controlador de la base de datos
+     */
+    protected ControladorBDD controladorBDD;
+
+    /**
+     * Construye el modo
+     * @param controller controlador base de datos
+     * @param user usuario proxy
+     */
+    public Modo(ControladorBDD controller, UsuarioProxy user){
+        
+        controladorBDD = controller;
+        usuario = user;
+    }
 
 
     /**

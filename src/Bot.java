@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Scanner;
 
 /**
@@ -14,53 +15,78 @@ public class Bot {
     /** Usuario actual */
     private UsuarioProxy user;
 
-    /** Objeto de la base de datos */
-    private BDDUsuarios bdd = new BDDUsuarios();
+    /** Controlador para la base de datos */
+    private static ControladorBDD controlador = new ControladorBDD();
 
     /**
      * Registra al usuario
-     * @param args
      */
     public void registar(){
 
+        //Bajando la informacion de la base de datos
+        System.out.println("\n--> Cargando la informacion, espere un momento.....\n");
+        controlador.restaurarBDD();
+
+        System.out.println("\n**************************************\n");
         Scanner s = new Scanner(System.in);
-        String  nombre, edad, usuario, telefono, carrera;
-        int age;
+        String  nombre, usuario, telefono, carrera, contrasena, correo;
         long tel;
+        String verficaUsuario, verificaContra;
 
-        
+        boolean registrar = false;
+        while(!registrar){
 
-        System.out.println("- Escribe tu nombre: ");
-        nombre = s.nextLine();
-        System.out.println("- Escribe tu edad: ");
-        while(true){
+            System.out.println("-> Escribe tu nombre de Usuario:");
+            verficaUsuario = s.nextLine();
+            System.out.println("-> Escribe tu contrasena:");
+            verificaContra = s.nextLine();
 
-            try{
-                edad = s.nextLine();
-                age = Integer.parseInt(edad);
-                break;
+            if(controlador.existeUsuario(verficaUsuario)){
+                
+                if(controlador.identificarUsuario(verficaUsuario, verificaContra)){
+                    System.out.println("\n- Bienvenido de vuelta "+
+                    verficaUsuario+"\n");
+                    user = controlador.obtenerUsuario(verficaUsuario);
+                    return;
+                }
 
-            }catch(NumberFormatException nfe){
-                System.out.print("\nDigita un numero por favor:  ");
-                continue;
+
             }
 
-            if(age > 2 && age < 110)
-                break;
-            else 
-                System.out.print("\nDigita una edad valida:  ");
+            System.out.println("\n- Usuario o contrasena incorrecta, ¿Estas registrado?[Si/No]:");
+                
+            while(true){
+                String resp = s.nextLine();
 
+                if(resp.equalsIgnoreCase("si")){
+                    System.out.println("\nDe acuerdo, intentalo de nuevo...\n");
+                    break;
+
+                }else if(resp.equalsIgnoreCase("no")){
+                    System.out.println("\nDe acuerdo, te registrare a continuacion....\n");
+                    registrar = true;
+                    break;
+                
+                }else{
+                    System.out.println("\nEscribe Si o No por favor:");
+                }
+            }   
+            
         }
-
+    
+        System.out.println("- Escribe tu nombre: ");
+        nombre = s.nextLine();
         System.out.println("- Escribe un nombre de usuario: ");
         usuario = s.nextLine();
+        System.out.println("- Escribe una contrasena: ");
+        contrasena = s.nextLine();
 
         System.out.println("- Escribe tu telefono: ");
         while(true){
 
             try{
                 telefono = s.nextLine();
-                tel = Integer.parseInt(telefono);
+                tel = Long.parseLong(telefono);
                 break;
 
             }catch(NumberFormatException nfe){
@@ -70,29 +96,61 @@ public class Bot {
 
         }
 
-        System.out.println("- Escribe la carrera que estas estudiando:  ");
-        carrera = s.nextLine();
-
-        if(bdd.existeUsuario(nombre, edad, usuario, edad, telefono, carrera)){
-
-            System.out.println("\n-> Parece que ya has sido registrado anteriormente, bienvenido de vuelta "+
-            usuario+"\n");
-            user = bdd.obtenerUsuario(usuario);
+        System.out.println("- Escribe tu correo:  ");
+        while(true){
             
-        }else{
+            correo = s.nextLine();
 
-            user = bdd.agregarUsuario(nombre, edad, usuario, edad, telefono, carrera);
-            System.out.println("\n-> Usuario registrado correctamente!\n");
+            if(correo.contains("@") && correo.contains(".")){
+                break;
+            }else{
+            
+                System.out.println("\nEscribe correo valido por favor:");
+            }
         }
 
+
+        System.out.println("- Escribe la carrera que estas estudiando:  ");
+        carrera = s.nextLine();
+        
+
+        HashMap<String, String> infoUsuario = new HashMap<>();
+        infoUsuario.put("nombre", nombre);
+        infoUsuario.put("usuario", usuario);
+        infoUsuario.put("contrasena", contrasena);
+        infoUsuario.put("telefono", telefono);
+        infoUsuario.put("correo", correo);
+        infoUsuario.put("carrera", carrera);
+        
+        controlador.agregarUsuario(infoUsuario);
+        user = controlador.obtenerUsuario(usuario);
+
+        System.out.println("- ¿Deseas dar tu consentimiento para compartir tu informacion a otros usuarios?[Si/No]:  ");
+
+        while(true){
+            String consen = s.nextLine();
+
+                if(consen.equalsIgnoreCase("si")){
+                    user.getUsuarioReal().setConsentimientoDeConexion(true);
+                    break;
+
+                }else if(consen.equalsIgnoreCase("no")){
+                    user.getUsuarioReal().setConsentimientoDeConexion(false);
+                    break;
+                
+                }else{
+                    System.out.println("\nEscribe Si o No por favor:");
+                }
+        }
+
+        System.out.println("\n-> Usuario registrado correctamente!\n");
+        System.out.println("**************************************\n");
+        
+        
 
     }
 
     public static void main(String[] args) {
-
-
-        /* Si es con el bot de telegram hacer metodos de: escribirMensaje(String mensaje), 
-            String leerMensaje() */
         
         /* Iniciando ejecucion */
         Bot bot = new Bot();
@@ -103,13 +161,16 @@ public class Bot {
         String opcion;
         int opc;
 
-        System.out.println("\n>>>>>>>> HOLA, SOY BUZZ, EL BOT QUE TE EVALUA ;^) <<<<<<<<");
-        System.out.println("-- Espero mis servicios te sirvan :D --");
-        System.out.println("-> Primero vamos a registrate:");
-        bot.registar();
-        
 
-        System.out.println("-> Tengo dos modos para evaluar:");
+
+        System.out.println("\n>>>>>>>>>>>>> HOLA, BIENVENIDO A QUIZME! <<<<<<<<<<<<<\n"+
+        ">>>>>>>>>>> SOY BUZZ, EL BOT QUE TE EVALUA ;^) <<<<<<<<<<<");
+        System.out.println("---- Espero mis servicios te sirvan :D ----");
+        System.out.println("--> Inicia sesion primero:");
+        
+        bot.registar();
+
+        System.out.println("\n---> Tengo dos modos para ti:");
         System.out.println("\t1. Modo Psicologico: Te evaluare para ver como te encuentras psicologicamente");
         System.out.println("\t2. Modo Recreativo: Escoge de mis varias evaluaciones divertidas que tengo "+
         "preprarado para ti!");
@@ -139,14 +200,14 @@ public class Bot {
 
                 case 1:
                     System.out.println("\nPasando al Modo Psicologico....\n");
-                    modo = new ModoPsicologico();
+                    modo = new ModoPsicologico(controlador, bot.user);
                     modo.ejecutar();
                     wrongOpc = false;
                     break;
 
                 case 2:
                     System.out.println("\nPasando al Modo Recreativo....\n");
-                    modo = new ModoRecreativo();
+                    modo = new ModoRecreativo(controlador, bot.user);
                     modo.ejecutar();
                     wrongOpc = false;
                     break;
@@ -164,7 +225,7 @@ public class Bot {
             if(wrongOpc)
                 continue;
 
-            System.out.print("\n¿Deseas terminar por hoy?[Si/No]:");
+            System.out.print("\n¿Deseas terminar por hoy?[Si/No]:  ");
             String opcSalida;
             while(true){
 
@@ -191,5 +252,12 @@ public class Bot {
 
         }while(!salir);
 
+        controlador.respaldarBDD();
     }
+
+
+
+
+
+
 }
