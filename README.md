@@ -1,5 +1,16 @@
 # Asistente-Psicologico
 Proyecto 2: Asistente Psicológico 
 
-El programa se ejecuta con el archivo Bot.java en el cual se encuentra el metodo main.
-La forma de compilacion es estándar pudiendo usarse asistentes o comandos en terminal (javac y java) directamente.
+# Skills 
+
+- [UML]
+- [Design patterns]
+- [OOP]
+
+# Ejecución:
+
+<h3>Posicionarse en la carpeta src y correr los siguientes comandos</h3>
+
+- [javac -cp lib/gson-2.6.2/gson-2.6.2.jar *.java]
+
+- [java -cp ".:lib/gson-2.6.2/gson-2.6.2.jar" Bot]
